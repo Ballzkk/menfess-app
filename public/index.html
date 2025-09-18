@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menfess or Songfess</title>
+    <style>
+      :root {
+  --bg: #111;
+  --text: #eee;
+  --input-bg: rgba(60, 60, 60, 0.8);
+  --popup-bg: rgba(30, 30, 30, 0.8);
+  --accent: #d4007f;
+  --button-bg: #333;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --highlight: rgba(0, 123, 255, 0.5);
+  --subtle-text: #999;
+}
+
+body.light-mode {
+  --bg: #f4f6fa;                      /* abu soft, kesan elegan */
+  --text: #222;                       /* gelap tapi bukan hitam */
+  --input-bg: #eceff1;                /* putih bersih tapi netral */
+  --popup-bg: rgba(255, 255, 255, 0.92);
+  --accent: #4f46e5;                  /* ungu biru modern */
+  --button-bg: #ebedf3;               /* abu keunguan soft */
+  --border-color: rgba(0, 0, 0, 0.06);
+  --highlight: rgba(79, 70, 229, 0.2); /* versi terang dari accent */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  background: var(--popup-bg);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+h1,
+label {
+  color: var(--text);
+}
+
+label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+input,
+textarea,
+#song {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+textarea {
+  resize: none;
+  height: 100px;
+}
+
+input:focus,
+textarea:focus,
+#song:focus {
+  outline: none;
+  box-shadow: 0 0 8px var(--highlight);
+}
+
+.char-count {
+  text-align: right;
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 3px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+button {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--button-bg);
+  color: var(--text);
+}
+
+.submit-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.reset-btn {
+  background: #5204c7;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #0056b3;
+}
+
+.reset-btn:hover {
+  background: #e64a19;
+}
+
+.submit-btn:active,
+.reset-btn:active {
+  transform: scale(0.95);
+}
+
+.anonym-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.anonym-container input {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-color);
+  border-radius: 5px;
+  background: var(--input-bg);
+  cursor: pointer;
+  position: relative;
+  transition: 0.3s ease;
+}
+
+.anonym-container input:hover {
+  background: var(--highlight)
+}
+
+.anonym-container input:checked {
+  background: var(--highlight);
+  border-color: var(--highlight);
+}
+
+.anonym-container input:checked::after {
+  content: "✔";
+  color: #fff;
+  font-size: 15px;
+  position: absolute;
+  left: 3px;
+  top: -1px;
+  font-weight: 600;
+}
+
+.readonly-dark {
+  background: bar(--highlight) !important;
+  color: var(--text) !important;
+}
+
+#popupSuccess {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 60, 120, 0.85);
+  color: white;
+  padding: 18px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  opacity: 0;
+  animation: fadeInOut 2s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+}
+
+.floating {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: float 5s infinite ease-in-out alternate;
+}
+.floating:nth-child(1) { top: 10%; left: 15%; animation-duration: 4s; }
+.floating:nth-child(2) { top: 40%; left: 70%; animation-duration: 6s; }
+.floating:nth-child(3) { top: 80%; left: 30%; animation-duration: 5s; }
+
+@keyframes float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-20px); }
+}
+
+      #confirmPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* tetap transparan */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.confirm-box {
+  background: var(--popup-bg);
+  color: var(--text);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.confirm-box p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.confirm-buttons button {
+  padding: 10px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+#confirmYes {
+  background-color: var(--accent);
+  color: white;
+}
+
+#confirmNo {
+  background-color: var(--button-bg);
+  color: var(--text);
+}
+
+/* Search & Popup */
+#song-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.song-results {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  background: var(--popup-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 220px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.song-scroll-list {
+  overflow-y: auto;
+  max-height: 170px;
+}
+
+.song-results .song-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+.song-results .song-item:last-child {
+  border-bottom: none;
+}
+.song-results .song-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.song-results .song-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  flex: 1;
+}
+.song-results .song-title {
+  font-weight: 600;
+}
+.song-results .song-meta {
+  font-size: 12px;
+}
+.song-results .toggle-btn {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.song-results .toggle-btn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text);
+  fill: var(--text);
+}
+.search-note,
+.search-note-fixed {
+  background: var(--popup-bg);
+  color: #ccc;
+  font-size: 11px;
+  font-style: italic;
+  padding: 5px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.hidden {
+display: none !important;
+}
+
+.song-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+  margin-right: 10px;
+}
+
+/* Scrollbar */
+.song-results::-webkit-scrollbar {
+  width: 6px;
+}
+.song-results::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 5px;
+}
+.song-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Overlay dan Popup */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+
+.popup {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--popup-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 25px 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+}
+
+.popup-content {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.7;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px; right: 15px;
+  background-color: rgba(220, 20, 60, 0.8);
+  color: white;
+  border: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.close-btn:hover {
+  background-color: crimson;
+}
+
+/* Toggle theme button */
+#toggle-theme {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--input-bg);
+  color: var(--text);
+  z-index: 9999;
+}
+
+
+.popup-history {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--popup-bg);
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  z-index: 1001;
+  color: var(--text-color);
+  box-shadow: 0 0 25px rgba(0,0,0,0.2);
+}
+
+.popup-history h3{
+    margin-bottom: 5px;
+}
+
+#openHistoryBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 20px;
+  padding: 5px 8px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  z-index: 998;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.history-card-custom {
+  position: relative;
+  background: var(--input-bg);
+  color: var(--text-color);
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.history-card-custom .card-inner {
+  transition: transform 0.3s ease;
+  line-height: 1.4;
+}
+
+.history-card-custom.swiped .card-inner {
+  transform: translateX(-90px);
+}
+
+.history-card-custom .delete-btn {
+  position: absolute;
+  top: 0; right: 0;
+  height: 100%;
+  width: 90px;
+  background: crimson;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transform: translateX(100%);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.history-card-custom.swiped .delete-btn {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+#overlayHist {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+}
+
+.confirmHistoryPopup {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--popup-bg);
+  color: var(--text-color);
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 2000;
+  text-align: center;
+}
+
+.confirmDelHist {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.confirmDelHist button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--popup-bg);
+  color: var(--text-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.music-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--input-bg);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.mini-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mini-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.song-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  font-size: 12px;
+  color: var(--subtle-text, #aaa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.play-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.play-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--text-color);
+}
+
+.music-meta {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-color);
+  padding-left: 2px;
+}
+
+.music-bars {
+  display: flex;
+  gap: 3px;
+  height: 18px;
+  margin-left: 10px;
+  align-items: flex-end;
+}
+
+.music-bars span {
+  width: 3px;
+  height: 5px;
+  background: var(--accent, #4ade80);
+  animation: bounce 1s infinite ease-in-out;
+}
+
+.music-bars span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.music-bars span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 100% { height: 5px; }
+  50% { height: 14px; }
+}
+
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.title-wrapper.shifted .song-title {
+  margin-left: 8px;
+}
+    </style>
+  </head>
+  <body>
+    <div class="floating"></div>
+    <div class="floating"></div>
+    <div class="floating"></div>
+
+    <div class="overlay" id="popup-overlay">
+      <div class="popup">
+        <button class="close-btn" id="close-btn">X</button>
+        <div class="popup-content">
+          <h2>Halo Kamu~</h2>
+          <p>
+            Heii kamu... iya, kamu yang baru mampir ke sini...
+            <br /><br />
+            Selamat datang di <strong>Menfess / Songfess 12 TKJ DUA!</strong>
+            <br /><br />
+            Lagi pengin curhat tapi malu?<br />
+            Mau ngodein doi tapi takut ketauan?<br />
+            Atau cuma mau kirim lagu buat seseorang yang... spesial?
+            <br /><br />
+            Tenang aja, di sini kamu bisa kirim pesan atau lagu secara anonim —
+            atau terang-terangan kalau kamu berani!
+            <br /><br />
+            Centang <em>“Anonim”</em> kalau kamu belum siap diketahui dia.
+            <br /><br />
+            Yuk, ekspresiin rasa kamu...
+            <strong>sebelum dia disambar orang lain!</strong> <br /><br />
+            <em>#JanganDipendemSendiri</em>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+<button id="toggle-theme">🌓 Mode</button>
+
+
+<button id="openHistoryBtn">📂 History</button>
+
+<div id="overlayHist" class="hidden"></div>
+
+<div id="popupHistoryCustom" class="popup-history hidden">
+  <h3>History Message</h3>
+  <div id="historyListCustom"></div>
+  <button id="clearAllHistoryBtn" style="margin-top:10px;background:crimson;color:white;">Hapus History</button>
+</div>
+
+<div id="confirmHistoryPopup" class="confirmHistoryPopup hidden">
+  <p id="confirmHistoryText">Yakin ingin menghapus?</p>
+  <div class="confirmDelHist">
+    <button id="confirmDelYes">Ya, Hapus</button>
+    <button id="confirmDelNo">Batal</button>
+  </div>
+</div>
+
+    <div class="container">
+      <h1>Menfess or Songfess XII TKJ 2</h1>
+      <form id="messageForm">
+          <input type="hidden" name="_captcha" value="false">        
+           <label for="song">Song:</label>
+        <div id="song-wrapper">
+    <input
+      type="text"
+      id="song"
+      name="song"
+      placeholder="Judul Lagu"
+      autocomplete="off"
+      required
+    />
+    <div class="song-results"></div>
+  </div>
+  <audio id="audioPlayer" class="hidden"></audio>
+        <label for="name">Name:</label>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          placeholder="Nama Kamu"
+          required
+        />
+        <div class="anonym-container">
+          <input type="checkbox" id="anonymCheckbox" />
+          <label for="anonymCheckbox">Ingin Merahasiakan?</label>
+        </div>
+        <label for="to">To:</label>
+        <input
+          type="text"
+          name="to"
+          id="to"
+          placeholder="Nama Penerima"
+          required
+        />
+
+        <label for="message">Message:</label>
+        <textarea
+          name="message"
+          id="messageInput"
+          placeholder="Masukkan pesan di sini..."
+          required
+        ></textarea>
+        <div class="char-count" id="charCount">0/250</div>
+
+        <div class="buttons">
+          <button type="submit" class="submit-btn">Kirim</button>
+          <button type="reset" class="reset-btn">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="confirmPopup" style="display: none">
+      <div class="confirm-box">
+        <p>Apakah kamu yakin ingin mengirim pesan ini?</p>
+        <div class="confirm-buttons">
+          <button id="confirmYes">Ya</button>
+          <button id="confirmNo">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="popupSuccess">Pesan berhasil dikirim, Terimakasih yaa:)</div>
+
+    <script>
+        
+        let selectedCoverUrl = "";
+let selectedArtist = "";
+let selectedSong = "";
+let selectedPreviewUrl = "";
+        
+        
+      const messageInput = document.getElementById("messageInput");
+      const charCount = document.getElementById("charCount");
+      const form = document.getElementById("messageForm");
+
+      messageInput.addEventListener("input", () => {
+        const length = messageInput.value.length;
+        charCount.textContent = `${length}/250`;
+      });
+
+      const anonymCheckbox = document.getElementById("anonymCheckbox");
+      const nameInput = document.getElementById("name");
+
+      anonymCheckbox.addEventListener("change", () => {
+        if (anonymCheckbox.checked) {
+  nameInput.value = "Anonymous";
+  nameInput.readOnly = true;
+  nameInput.classList.add("readonly-dark");
+} else {
+  nameInput.value = "";
+  nameInput.readOnly = false;
+  nameInput.classList.remove("readonly-dark");
+}
+      });
+
+      form.addEventListener("submit", (event) => {
+  event.preventDefault(); // stop form dari auto submit
+
+  // tampilkan popup konfirmasi dulu
+  showConfirmPopup(() => {
+    const song = document.getElementById("song").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const to = document.getElementById("to").value.trim();
+    const message = document.getElementById("messageInput").value.trim();
+
+    const formData = new FormData(form);
+
+    fetch("/.netlify/functions/submit", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ song, name, to, message })
+})
+.then(res => res.json())
+.then(data => {
+  if (data.success) {
+    showPopup();
+    form.reset();
+  } else {
+    alert("Gagal menyimpan pesan!");
+  }
+})
+.catch(err => console.error(err));
+    .then((response) => {
+      if (response.ok) {
+        // ✅ Hanya simpan ke history jika pengiriman berhasil
+        saveCustomHistory({
+          song,
+          name,
+          to,
+          message,
+          artist: selectedArtist,
+          cover: selectedCoverUrl,
+          title: selectedSong,
+          preview: selectedPreviewUrl
+        });
+
+        showPopup(); // popup "terkirim"
+        form.reset();
+        charCount.textContent = "0/250";
+      } else {
+        alert("Gagal mengirim pesan. Coba lagi.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Terjadi kesalahan.");
+    });
+  });
+});
+
+
+const openHistoryBtn = document.getElementById("openHistoryBtn");
+const popupHist = document.getElementById("popupHistoryCustom");
+const overlayHist = document.getElementById("overlayHist");
+const historyList = document.getElementById("historyListCustom");
+
+const confirmPopup = document.getElementById("confirmHistoryPopup");
+const confirmText = document.getElementById("confirmHistoryText");
+const confirmYes = document.getElementById("confirmDelYes");
+const confirmNo = document.getElementById("confirmDelNo");
+const clearAllHistoryBtn = document.getElementById("clearAllHistoryBtn");
+
+let histDeleteIndex = null;
+let isDeleteAllHist = false;
+
+function getCustomHistory() {
+  return JSON.parse(localStorage.getItem("customHistory") || "[]");
+}
+
+function saveCustomHistory(item) {
+  const history = JSON.parse(localStorage.getItem("customHistory") || "[]");
+  history.unshift(item);
+  if (history.length > 5) history.pop(); // batas 5 history
+  localStorage.setItem("customHistory", JSON.stringify(history));
+  renderCustomHistory(); // tampilkan ulang history
+}
+
+function renderCustomHistory() {
+  const history = getCustomHistory();
+  historyList.innerHTML = "";
+
+  if (history.length === 0) {
+    historyList.innerHTML = "<p style='color:#aaa;'>Belum ada riwayat.</p>";
+    return;
+  }
+
+  history.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "history-card-custom";
+
+    card.innerHTML = `
+      <div class="card-inner">
+  <div class="music-mini">
+    <img class="mini-thumb" src="${item.cover}" alt="cover" />
+    <div class="mini-info">
+      <div class="song-title">${item.title}</div>
+      <div class="song-artist">${item.artist}</div>
+    </div>
+    <button class="play-btn" data-url="${item.preview}">
+  <!-- Play Icon -->
+  <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+
+  <!-- Pause Icon (disembunyikan awalnya) -->
+  <svg class="icon-pause" viewBox="0 0 24 24" style="display: none;"><path d="M6 5h4v14H6zm8 0h4v14h-4z" fill="currentColor"/></svg>
+</button>
+<div class="music-bars" style="display: none;">
+  <span></span><span></span><span></span>
+</div>
+  </div>
+
+  <div class="music-meta">
+    💌 <b>From: ${item.name} - To: ${item.to}</b><br>
+    “${item.message}”
+  </div>
+</div>
+      </div>
+      <div class="delete-btn" onclick="askDeleteHistory(${index})">Hapus</div>
+    `;
+
+    // Geser untuk hapus
+    let startX = 0;
+    card.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+    card.addEventListener("touchmove", e => {
+      const moveX = e.touches[0].clientX;
+      if (startX - moveX > 30) card.classList.add("swiped");
+      if (moveX - startX > 30) card.classList.remove("swiped");
+    });
+
+    historyList.appendChild(card);
+  });
+
+  let audio = new Audio();
+let currentBtn = null;
+let currentBars = null;
+
+document.querySelectorAll(".play-btn").forEach(btn => {
+  const playIcon = btn.querySelector(".icon-play");
+  const pauseIcon = btn.querySelector(".icon-pause");
+
+  // Ambil elemen .music-bars di dalam .music-mini yang sama
+  const bars = btn.closest(".music-mini")?.querySelector(".music-bars");
+
+  btn.addEventListener("click", () => {
+    const url = btn.dataset.url;
+
+    // Jika tombol sebelumnya berbeda, reset tombol & animasi sebelumnya
+    if (currentBtn && currentBtn !== btn) {
+      currentBtn.querySelector(".icon-play").style.display = "inline";
+      currentBtn.querySelector(".icon-pause").style.display = "none";
+      if (currentBars) currentBars.style.display = "none";
+      audio.pause();
+    }
+
+    if (currentBtn === btn) {
+      if (audio.paused) {
+        audio.play();
+        playIcon.style.display = "none";
+        pauseIcon.style.display = "inline";
+        if (bars) bars.style.display = "flex";
+      } else {
+        audio.pause();
+        playIcon.style.display = "inline";
+        pauseIcon.style.display = "none";
+        if (bars) bars.style.display = "none";
+      }
+    } else {
+      audio.src = url;
+      audio.play();
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "inline";
+      if (bars) bars.style.display = "flex";
+      currentBtn = btn;
+      currentBars = bars;
+    }
+
+    // Reset ketika lagu selesai
+    audio.onended = () => {
+      if (currentBtn) {
+        currentBtn.querySelector(".icon-play").style.display = "inline";
+        currentBtn.querySelector(".icon-pause").style.display = "none";
+      }
+      if (currentBars) currentBars.style.display = "none";
+    };
+  });
+});
+}
+
+window.addEventListener("DOMContentLoaded", renderCustomHistory);
+
+function askDeleteHistory(index) {
+  histDeleteIndex = index;
+  isDeleteAllHist = false;
+  confirmText.textContent = "Yakin ingin menghapus riwayat ini?";
+  confirmPopup.classList.remove("hidden");
+}
+
+clearAllHistoryBtn.addEventListener("click", () => {
+  isDeleteAllHist = true;
+  confirmText.textContent = "Yakin ingin menghapus semua riwayat?";
+  confirmPopup.classList.remove("hidden");
+});
+
+confirmYes.addEventListener("click", () => {
+  if (isDeleteAllHist) {
+    localStorage.removeItem("customHistory");
+  } else if (histDeleteIndex !== null) {
+    const history = getCustomHistory();
+    history.splice(histDeleteIndex, 1);
+    localStorage.setItem("customHistory", JSON.stringify(history));
+  }
+  confirmPopup.classList.add("hidden");
+  renderCustomHistory();
+});
+
+confirmNo.addEventListener("click", () => {
+  confirmPopup.classList.add("hidden");
+});
+
+openHistoryBtn.addEventListener("click", () => {
+  renderCustomHistory();
+  popupHist.classList.remove("hidden");
+  overlayHist.classList.remove("hidden");
+});
+
+overlayHist.addEventListener("click", () => {
+  popupHist.classList.add("hidden");
+  overlayHist.classList.add("hidden");
+  confirmPopup.classList.add("hidden");
+});
+
+      function showPopup() {
+        const popup = document.getElementById("popupSuccess");
+        popup.style.display = "block";
+        popup.style.animation = "fadeInOut 2s forwards";
+        setTimeout(() => {
+          popup.style.display = "none";
+        }, 2000);
+      }
+
+      function showConfirmPopup(onConfirm) {
+        const popup = document.getElementById("confirmPopup");
+        popup.style.display = "flex";
+
+        const yesBtn = document.getElementById("confirmYes");
+        const noBtn = document.getElementById("confirmNo");
+
+        yesBtn.onclick = () => {
+          popup.style.display = "none";
+          onConfirm();
+        };
+
+        noBtn.onclick = () => {
+          popup.style.display = "none";
+        };
+      }
+
+      window.addEventListener("load", function () {
+        const overlay = document.getElementById("popup-overlay");
+        const closeBtn = document.getElementById("close-btn");
+
+        // Tampilkan popup saat halaman dimuat
+        overlay.style.display = "block";
+
+        // Tutup popup saat tombol X diklik
+        closeBtn.addEventListener("click", function () {
+          overlay.style.display = "none";
+        });
+      });
+            
+     (function () {
+  const input = document.getElementById("song");
+  const dropdown = document.querySelector(".song-results");
+  const audio = document.getElementById("audioPlayer");
+  let debounce, currentBtn;
+
+  function showDropdown() {
+    dropdown.style.display = "block";
+  }
+
+  function hideDropdown() {
+    dropdown.style.display = "none";
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounce);
+    const q = input.value.trim();
+    if (!q) return hideDropdown();
+    debounce = setTimeout(() => fetchResults(q), 300);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && e.target !== input) {
+      hideDropdown();
+    }
+  });
+
+  async function fetchResults(q) {
+    dropdown.innerHTML = '<p style="padding:8px;color:#666;">Mencari…</p>';
+    showDropdown();
+    try {
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music`);
+      if (!res.ok) throw new Error("Gagal mengambil data");
+      const data = await res.json();
+      const filtered = sortAndFilterResults(data.results, q);
+      render(filtered.slice(0, 15));
+    } catch (err) {
+      dropdown.innerHTML = `<p style="padding:8px;color:#c00;">${err.message}</p>`;
+    }
+  }
+
+  function sortAndFilterResults(results, query) {
+    const q = query.toLowerCase();
+    let artistCount = {};
+    const withScores = results.map((t) => {
+      const title = (t.trackName || "").toLowerCase();
+      const artist = (t.artistName || "").toLowerCase();
+      let score = 0;
+
+      // Hitung kemunculan artist yang cocok sebagian
+      if (artist.includes(q) || q.includes(artist)) {
+        artistCount[artist] = (artistCount[artist] || 0) + 1;
+      }
+
+      // Skoring
+      if (title === q) score = 100;
+      else if (title.includes(q)) score = 80;
+      else if (artist.includes(q)) score = 50;
+
+      return { ...t, _score: score };
+    });
+
+    const topArtist = Object.entries(artistCount).sort((a, b) => b[1] - a[1])[0];
+    const artistThreshold = 3;
+
+    if (topArtist && topArtist[1] >= artistThreshold) {
+      const matchedArtist = topArtist[0];
+      const isExact = matchedArtist === q;
+
+      if (isExact) {
+        return withScores.filter(t => t.artistName.toLowerCase() === matchedArtist);
+      } else {
+        const utama = withScores
+          .filter(t => t.artistName.toLowerCase() === matchedArtist)
+          .sort((a, b) => b._score - a._score);
+
+        const tambahan = withScores
+          .filter(t => t.artistName.toLowerCase() !== matchedArtist && t._score > 0)
+          .sort((a, b) => b._score - a._score);
+
+        return [...utama, ...tambahan];
+      }
+    }
+
+    return withScores
+      .filter(t => t._score > 0)
+      .sort((a, b) => b._score - a._score);
+  }
+
+  function formatDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function render(tracks) {
+    if (!tracks.length) {
+      dropdown.innerHTML = '<p style="padding:8px;color:#666;">Tidak ada hasil.</p>';
+      return;
+    }
+
+    dropdown.innerHTML = `
+  <div class="search-note-fixed">
+    Jika lagu tidak ditemukan, ketik Nama Lagu dan Artis, Contoh: <strong>Duka Last Child</strong> - kalo masih tidak ditemukan ketik manual saja:)
+  </div>
+  <div class="song-scroll-list">
+    ${tracks.map(t => `
+      <div class="song-item" data-url="${t.previewUrl}" data-title="${t.trackName}" data-artist="${t.artistName}">
+  <img class="song-cover" src="${t.artworkUrl100}" alt="cover" />
+  <div class="song-info">
+    <span class="song-title">${t.trackName}</span>
+    <span class="song-meta">${t.artistName} • ${formatDuration(t.trackTimeMillis || 0)}</span>
+  </div>
+  <button class="toggle-btn" title="Play/Pause">
+    <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <svg class="icon-pause hidden" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+  </button>
+</div>
+    `).join("")}
+  </div>
+`;
+
+    dropdown.querySelectorAll(".song-item").forEach((item) => {
+      const btn = item.querySelector(".toggle-btn");
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const url = item.dataset.url;
+        if (currentBtn && currentBtn !== btn) reset(currentBtn);
+
+        if (currentBtn === btn) {
+          if (audio.paused) {
+            audio.play();
+            swap(btn, true);
+          } else {
+            audio.pause();
+            swap(btn, false);
+          }
+        } else {
+          audio.src = url;
+          audio.play();
+          swap(btn, true);
+          currentBtn = btn;
+        }
+      });
+
+      item.addEventListener("click", () => {
+  const input = document.querySelector('input[name="song"]');
+  input.value = `${item.dataset.title} - ${item.dataset.artist}`;
+
+  // ✅ Simpan semua data lagu yang diklik ke variabel global
+  selectedSong = item.dataset.title;
+  selectedArtist = item.dataset.artist;
+  selectedCoverUrl = item.querySelector(".song-cover").src;
+  selectedPreviewUrl = item.dataset.url;
+
+  hideDropdown();
+});
+    });
+
+    audio.onended = () => {
+      if (currentBtn) reset(currentBtn);
+    };
+  }
+
+  function swap(btn, playing) {
+    btn.querySelector(".icon-play").classList.toggle("hidden", playing);
+    btn.querySelector(".icon-pause").classList.toggle("hidden", !playing);
+  }
+
+  function reset(btn) {
+    btn.querySelector(".icon-play").classList.remove("hidden");
+    btn.querySelector(".icon-pause").classList.add("hidden");
+    if (btn === currentBtn) currentBtn = null;
+  }
+})();
+
+
+ 
+  const toggleBtn = document.getElementById('toggle-theme');
+  const body = document.body;
+
+  // Fungsi untuk memperbarui teks tombol sesuai tema
+  function updateToggleButtonText() {
+    if (body.classList.contains('light-mode')) {
+      toggleBtn.textContent = '🌙 Mode';
+    } else {
+      toggleBtn.textContent = '☀️ Mode';
+    }
+  }
+
+  // Set tema awal dari localStorage
+  if (localStorage.getItem('theme') === 'light') {
+    body.classList.add('light-mode');
+  }
+
+  // Perbarui tombol saat awal load
+  updateToggleButtonText();
+
+  // Toggle event
+  toggleBtn.addEventListener('click', () => {
+    body.classList.toggle('light-mode');
+    const isLight = body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateToggleButtonText();
+  });
+</script>
+  </body>
+</html>
